@@ -1,0 +1,10 @@
+
+git add filename   
+
+
+git commit -m   "zhushi"
+
+
+git push -u origin master  || git push -u origin master -f
+
+加与修改

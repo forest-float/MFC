@@ -1,0 +1,17 @@
+$ git --help 帮助命令
+
+$ git pull origin master 将远程仓库里面的项目拉下来
+
+$ dir  查看有哪些文件夹
+
+$ git rm -r --cached Photo\ albums  删除Photo albums文件夹(这里的文件夹名有空格命令行需要用"\ "来拼接）
+
+$ git commit -m '删除了Photo albums文件夹t'  提交,添加操作说明
+
+$ git push -u origin master 将本次更改更新到GitHub项目上去
+
+命令行删除文件夹操作成功！
+
+注:本地项目中的Photo albums文件夹不收操作影响,删除的只是远程仓库中的Photo albums, 可放心删除
+
+每次增加文件或删除文件，都要commit 然后直接 git push -u origin master，就可以同步到GitHub上了。
