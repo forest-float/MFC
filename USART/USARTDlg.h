@@ -17,9 +17,10 @@ public:
 	enum { IDD = IDD_USART_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-
+	CFont m_font;
+	CFont m_font1;
 
 // 实现
 protected:
@@ -40,6 +41,7 @@ public:
 	CComboBox m_cb5;
 	CRect oldrect;
 	unsigned char flag = 0;
+	unsigned char buff[4] = { 0xFF,0xFF,0xFF,0xFF };
 
 	afx_msg void Alert(void);
 
@@ -59,6 +61,7 @@ public:
 	void OpenLED(unsigned char num);
 	void Receive();
 	void HexToStr(unsigned char receive[], int len);
+	void CloseLED(unsigned char num);
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnCbnSelchangeCombo5();

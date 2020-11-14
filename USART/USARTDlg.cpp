@@ -115,6 +115,54 @@ BOOL CUSARTDlg::OnInitDialog()
 {
 	
 	CDialogEx::OnInitDialog();
+	
+	m_font.CreateFont(0, 10, 0, 0, 300, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_ROMAN, "宋体");
+	m_font1.CreateFont(0, 0, 0, 0, 1000, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_ROMAN, "宋体");
+
+	m_cb1.SetFont(&m_font);
+	m_cb2.SetFont(&m_font);
+	m_cb3.SetFont(&m_font);
+	m_cb4.SetFont(&m_font);
+	m_cb5.SetFont(&m_font);
+
+	c_fz.SetFont(&m_font);
+	c_ch.SetFont(&m_font);
+
+	GetDlgItem(IDC_BUTTON3)->SetFont(&m_font);	
+	GetDlgItem(IDC_BUTTON2)->SetFont(&m_font);
+	GetDlgItem(IDC_EDIT1)->SetFont(&m_font);		
+	GetDlgItem(IDC_COMBO1)->SetFont(&m_font);	
+	GetDlgItem(IDC_COMBO2)->SetFont(&m_font);	
+	GetDlgItem(IDC_COMBO3)->SetFont(&m_font);	
+	GetDlgItem(IDC_COMBO4)->SetFont(&m_font);
+	GetDlgItem(IDC_COMBO5)->SetFont(&m_font);	
+	GetDlgItem(IDC_STATIC1)->SetFont(&m_font);
+	GetDlgItem(IDC_STATIC2)->SetFont(&m_font);
+	GetDlgItem(IDC_STATIC3)->SetFont(&m_font);
+	GetDlgItem(IDC_STATIC4)->SetFont(&m_font);
+	GetDlgItem(IDC_STATIC5)->SetFont(&m_font);
+	GetDlgItem(IDC_STATIC7)->SetFont(&m_font);
+	GetDlgItem(IDC_BUTTON1)->SetFont(&m_font);	
+	GetDlgItem(IDC_COMBO1)->SetFont(&m_font);
+	GetDlgItem(IDC_COMBO2)->SetFont(&m_font);
+	GetDlgItem(IDOK)->SetFont(&m_font);
+
+	GetDlgItem(IDC_BUTTON_SET)->SetFont(&m_font);
+	GetDlgItem(IDC_BUTTON_SETFZ)->SetFont(&m_font);
+	
+
+	((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetFont(&m_font);
+	((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetFont(&m_font);
 
 	//串口
 	m_cb1.AddString(_T("COM1"));
@@ -166,10 +214,17 @@ BOOL CUSARTDlg::OnInitDialog()
 	//m_cb5.AddString(_T("奇校验"));
 	//m_cb5.AddString(_T("偶校验"));
 	//轮询频率
-	c_fz.AddString(_T("800ms"));
-	c_fz.AddString(_T("1000ms"));
-	c_fz.AddString(_T("1200ms"));
-	c_fz.SetCurSel(0);
+	c_fz.AddString(_T("100"));
+	c_fz.AddString(_T("200"));
+	c_fz.AddString(_T("300"));
+	c_fz.AddString(_T("400"));
+	c_fz.AddString(_T("500"));
+	c_fz.AddString(_T("600"));
+	c_fz.AddString(_T("700"));
+	c_fz.AddString(_T("800"));
+	c_fz.AddString(_T("900"));
+	c_fz.AddString(_T("1000"));
+	c_fz.SetCurSel(9);
 	//SetDlgItemText(IDC_COMBOFZ, "800ms");
 	//信道
 	c_ch.AddString(_T("1"));
@@ -188,7 +243,7 @@ BOOL CUSARTDlg::OnInitDialog()
 	c_ch.SetCurSel(12);
 	//SetDlgItemText(IDC_COMBOCH, "FF");
 
-	SetTimer(1, 1000, NULL); //参数：定时器标号，定时时间（ms）。启动定时器1，每隔1s刷新一次，
+	SetTimer(1, 100, NULL); //参数：定时器标号，定时时间（ms）。启动定时器1，每隔1s刷新一次，
 
 
 
@@ -572,19 +627,33 @@ void CUSARTDlg::HexToStr(unsigned char receive[], int len)
 {
 #pragma warning(suppress : 4996)
 	unsigned char temp[1024] = "";
-	unsigned char buff[4] = { 0 };
+	
 	memcpy(temp, receive, len);
 
 	UnPcakMessage(receive, buff);
 
-
+	if (type == 0x01)
+	{
+		type = 0;
+		if (!memcmp(&temp[4], "\x00\x00\x00\x00", 4))
+		{
+			CloseLED(ch);
+		}
+		else
+		{
+			OpenLED(ch);
+		}
+	}
+	
 	int i = 0;
 	for (i = 0; i < len; i++)
 	{
 		sprintf((char*)&receive[i*3],"%02X ",temp[i]);
 	}
-	if (flag)
+	if (type == 0x04)
 	{
+		//type = 0;
+		/*
 		if (buff[0] == 0x08)
 		{
 			c_fz.SetCurSel(2);
@@ -596,40 +665,152 @@ void CUSARTDlg::HexToStr(unsigned char receive[], int len)
 		if (buff[0] == 0x0C)
 		{
 			c_fz.SetCurSel(1);
-		}
+		}*/
+		c_fz.SetCurSel(temp[4] -1);
 		flag = 0;
 	}
 	//sprintf((char*)&receive[i * 3], "\r\n");
 }
-void CUSARTDlg::OpenLED(unsigned char num)
+void  CUSARTDlg::CloseLED(unsigned char num)
 {
-	((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetState(FALSE);
-	((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetState(FALSE);
+	static unsigned char temp = 0;
 
+	//if (num == temp)  return;
+	//temp = num;
 	switch (num)
 	{
-		case 1:    ((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetState(TRUE);      break;
-		case 2:    ((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetState(TRUE);      break;
-		case 3:    ((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetState(TRUE);      break;
-		case 4:    ((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetState(TRUE);      break;
-		case 5:    ((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetState(TRUE);      break;
-		case 6:    ((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetState(TRUE);      break;
-		case 7:    ((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetState(TRUE);      break;
-		case 8:    ((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetState(TRUE);      break;
-		case 9:    ((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetState(TRUE);      break;
-		case 10:   ((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetState(TRUE);      break;
-		case 11:   ((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetState(TRUE);      break;
-		case 12:   ((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetState(TRUE);      break;
+	case 1:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetFont(&m_font);
+		break;
+
+	case 2:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetFont(&m_font);
+		break;
+
+	case 3:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetFont(&m_font);
+		break;
+
+	case 4:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetFont(&m_font);
+		break;
+
+	case 5:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetFont(&m_font);
+		break;
+
+	case 6:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetFont(&m_font);
+		break;
+
+	case 7:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetFont(&m_font);
+		break;
+
+	case 8:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetFont(&m_font);
+		break;
+
+	case 9:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetFont(&m_font);
+		break;
+
+	case 10:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetFont(&m_font);
+		break;
+
+	case 11:
+		((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetFont(&m_font);
+		break;
+
+	case 12:
+		((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetState(FALSE);
+		((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetFont(&m_font);
+
+		break;
+	default:break;
+	}
+
+}
+void CUSARTDlg::OpenLED(unsigned char num)
+{
+	static unsigned char temp = 0;
+	
+	//if (num == temp)  return;
+	//temp = num;
+	switch (num)
+	{
+		case 1:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetState(TRUE);      
+			((CButton*)GetDlgItem(IDC_BUTTON_LED1))->SetFont(&m_font1);
+			break;
+
+		case 2:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetState(TRUE);      
+			((CButton*)GetDlgItem(IDC_BUTTON_LED2))->SetFont(&m_font1);
+			break;
+
+		case 3:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED3))->SetFont(&m_font1);
+			break;
+
+		case 4:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED4))->SetFont(&m_font1);
+			break;
+
+		case 5:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED5))->SetFont(&m_font1);
+			break;
+
+		case 6:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED6))->SetFont(&m_font1);
+			break;
+
+		case 7:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED7))->SetFont(&m_font1);
+			break;
+
+		case 8:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED8))->SetFont(&m_font1);
+			break;
+
+		case 9:    
+			((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetState(TRUE);   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED9))->SetFont(&m_font1);
+			break;
+
+		case 10:   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetState(TRUE);      
+			((CButton*)GetDlgItem(IDC_BUTTON_LED10))->SetFont(&m_font1);
+			break;
+
+		case 11:   
+			((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetState(TRUE);      
+			((CButton*)GetDlgItem(IDC_BUTTON_LED11))->SetFont(&m_font1);
+			break;
+
+		case 12:   
+			((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetState(TRUE);      
+			((CButton*)GetDlgItem(IDC_BUTTONLED12))->SetFont(&m_font1);
+
+			break;
 		default:break;
 	}
 }
@@ -658,10 +839,10 @@ void CUSARTDlg::Receive()
 	}*/
 
 	HexToStr(receive, len);
-	if (type == 0x01)
-	{
-		OpenLED(ch);
-	}
+	//if (type == 0x01)
+	//{
+	//	OpenLED(ch);
+	//}
 
 	CString receiveText(receive);
 
@@ -669,11 +850,22 @@ void CUSARTDlg::Receive()
 	receiveText += s;
 	receiveText += "\r\n";*/
 
-	GetDlgItemText(IDC_SPIN1, s);
-	receiveText = s + receiveText;
-	SetDlgItemText(IDC_SPIN1, receiveText);
-	SendDlgItemMessage(IDC_SPIN1, WM_VSCROLL, SB_BOTTOM, 0); //滚动条始终在底部
-	/*if (len != 0)
+
+	if (type == 0x04)
+	{
+		type = 0;
+		receiveText = "";
+		SetDlgItemText(IDC_SPIN1, receiveText);
+	}
+	else
+	{
+		GetDlgItemText(IDC_SPIN1, s);
+		receiveText = s + receiveText;
+		SetDlgItemText(IDC_SPIN1, receiveText);
+		SendDlgItemMessage(IDC_SPIN1, WM_VSCROLL, SB_BOTTOM, 0); //滚动条始终在底部
+
+	}
+															 /*if (len != 0)
 	{
 		if (receive[0] == '1')
 			canv.Update(1 * 100);
@@ -812,13 +1004,15 @@ void CUSARTDlg::OnBnClickedButtonSetfz()
 	index = c_fz.GetCurSel();		// 获取选定项的序号
 	c_fz.GetLBText(index, text);  // 获取数据位
 
+	flag = 1;
 	type = 0x03;
 	len = 0x01;
 	ch = 0xFF;
-	if (text == "800ms") temp[0] = 0x08;
-	else if (text == "1000ms") temp[0] = 0x0A;
-	else if (text == "1200ms") temp[0] = 0x0C;
-	else temp[0] = 0x08;
+	//if (text == "800ms") temp[0] = 0x08;
+	//else if (text == "1000ms") temp[0] = 0x0A;
+	//else if (text == "1200ms") temp[0] = 0x0C;
+	//else temp[0] = 0x08;
+	temp[0] = index + 1;
 	PcakMessage(temp, results);//组包
 	com.WriteDate(results, 8);
 }
@@ -827,6 +1021,7 @@ void CUSARTDlg::OnBnClickedButtonSet()
 {
 	// TODO: 在此添加控件通知处理程序代码
 
+	int i = 0;
 	int index;
 	CString text;
 	unsigned char results[16] = { 0 };
@@ -845,4 +1040,8 @@ void CUSARTDlg::OnBnClickedButtonSet()
 	if (text == "FF") temp[0] = 0xFF;
 	PcakMessage(temp, results);//组包
 	com.WriteDate(results, 8);
+	for (i = 1; i <= 12; i++)
+	{
+		CloseLED(i);
+	}
 }
